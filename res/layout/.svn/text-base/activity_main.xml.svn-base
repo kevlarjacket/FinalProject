@@ -1,0 +1,161 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E8E8E8"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity" >
+
+    <LinearLayout
+        android:id="@+id/sensorGroup"
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" >
+
+        <CheckBox
+            android:id="@+id/accelerometerCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accelerometer" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="5pt" >
+
+            <TextView
+                android:id="@+id/accX"
+                android:layout_width="80sp"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:text="X" />
+
+            <TextView
+                android:id="@+id/accY"
+                android:layout_width="80sp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5pt"
+                android:background="#FFFFFF"
+                android:text="Y" />
+
+            <TextView
+                android:id="@+id/accZ"
+                android:layout_width="80sp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5pt"
+                android:background="#FFFFFF"
+                android:text="Z" />
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/GeoMagneticCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Compass" />
+
+        <TextView
+            android:id="@+id/compassReading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:text="Azimuth" />
+
+        <CheckBox
+            android:id="@+id/GyroCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gyro" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="5pt" >
+
+            <TextView
+                android:id="@+id/gyroX"
+                android:layout_width="80sp"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:text="X" />
+
+            <TextView
+                android:id="@+id/gyroY"
+                android:layout_width="80sp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5pt"
+                android:background="#FFFFFF"
+                android:text="Y" />
+
+            <TextView
+                android:id="@+id/gyroZ"
+                android:layout_width="80sp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5pt"
+                android:background="#FFFFFF"
+                android:text="Z" />
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/sensorSamplingRate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/sensorSamplingRateTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/WiFiGroup"
+        style="?android:listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sensorGroup"
+        android:orientation="vertical" >
+
+        <CheckBox
+            android:id="@+id/WiFiCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="WiFi" />
+
+        <TextView
+            android:id="@+id/WiFiReading"
+            android:layout_width="match_parent"
+            android:layout_height="160sp" 
+            android:scrollbars="vertical"
+            android:maxLines="10"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/start_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start" />
+
+        <Button
+            android:id="@+id/reset_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reset" />
+    </LinearLayout>
+
+</RelativeLayout>

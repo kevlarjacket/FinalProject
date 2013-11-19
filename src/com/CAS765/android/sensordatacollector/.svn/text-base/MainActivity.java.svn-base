@@ -1,0 +1,275 @@
+package com.CAS765.android.sensordatacollector;
+
+import java.util.List;
+
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.text.method.ScrollingMovementMethod;
+import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
+
+public class MainActivity extends Activity implements SensorEventListener {
+	// If the values are set to 0 then we will sample as fast as we can
+	private final int MAX_SAMPLE = 100;
+	private final int DEFAULT_SAMPLING_RATE = 10;
+
+	private Button mStartButton, mResetButton;
+	private TextView mWiFiTextView, mAccXTextView, mAccYTextView,
+			mAccZTextView, mGyroXTextView, mGyroYTextView, mGyroZTextView,
+			mCompassTextView, mSensorSampleRateTextView,
+			mWiFiSampleRateTextView;
+	private CheckBox mWiFiCheckBox, mAccCheckBox, mGyroCheckBox,
+			mCompassCheckBox;
+	private SeekBar mSensorSlider;
+	private SensorManager mSensorManager;
+	private Sensor mAccelerometer, mGyro, mCompass;
+	// all in Hz
+	private int mAccSamplingRate = DEFAULT_SAMPLING_RATE,
+			mGyroSamplingRate = DEFAULT_SAMPLING_RATE,
+			mCompassSamplingRate = DEFAULT_SAMPLING_RATE;
+	private boolean isStarted = false;
+	private WifiManager mWifiManager;
+    private WifiReceiver mReceiverWifi;
+    List<ScanResult> wifiList;
+
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+
+		// Initialize the views
+		mWiFiTextView = (TextView) findViewById(R.id.WiFiReading);
+		mWiFiTextView.setMovementMethod(new ScrollingMovementMethod());
+
+		mAccXTextView = (TextView) findViewById(R.id.accX);
+		mAccYTextView = (TextView) findViewById(R.id.accY);
+		mAccZTextView = (TextView) findViewById(R.id.accZ);
+		mGyroXTextView = (TextView) findViewById(R.id.gyroX);
+		mGyroYTextView = (TextView) findViewById(R.id.gyroY);
+		mGyroZTextView = (TextView) findViewById(R.id.gyroZ);
+		mCompassTextView = (TextView) findViewById(R.id.compassReading);
+		mSensorSampleRateTextView = (TextView) findViewById(R.id.sensorSamplingRateTextView);
+
+		mWiFiCheckBox = (CheckBox) findViewById(R.id.WiFiCheckBox);
+		mAccCheckBox = (CheckBox) findViewById(R.id.accelerometerCheckBox);
+		mGyroCheckBox = (CheckBox) findViewById(R.id.GyroCheckBox);
+		mCompassCheckBox = (CheckBox) findViewById(R.id.GeoMagneticCheckBox);
+
+		mSensorSlider = (SeekBar) findViewById(R.id.sensorSamplingRate);
+
+		mSensorSlider.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				// TODO Auto-generated method stub
+				mSensorSampleRateTextView.setText("Sampling rate = " + progress
+						+ "(Hz)");
+			}
+
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+			}
+
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+			}
+		});
+
+		mSensorSlider.setMax(MAX_SAMPLE);
+		mSensorSlider.setProgress(DEFAULT_SAMPLING_RATE);
+
+		// Check the availability of the sensors. Disable the corresponding
+		// views if the sensor is not available
+		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		// get the accelerometer sensor
+		if ((mAccelerometer = mSensorManager
+				.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)) == null) {
+			mAccCheckBox.setEnabled(false);
+		}
+
+		if ((mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)) == null) {
+			mGyroCheckBox.setEnabled(false);
+		}
+		if ((mCompass = mSensorManager
+				.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)) == null) {
+			mCompassCheckBox.setEnabled(false);
+		}
+
+		mStartButton = (Button) findViewById(R.id.start_button);
+		mStartButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (!isStarted) {
+					mStartButton.setText("Stop");
+					startSensors();
+					isStarted = true;
+				} else {
+					mStartButton.setText("Start");
+					stopSensors();
+					isStarted = false;
+				}
+			}
+		});
+
+		mResetButton = (Button) findViewById(R.id.reset_button);
+		mResetButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				resetAll();
+			}
+		});
+	}
+
+    protected void onPause() {
+    	if (mReceiverWifi != null)
+    		unregisterReceiver(mReceiverWifi);
+        super.onPause();
+    }
+
+    protected void onResume() {
+    	if (mReceiverWifi != null)
+    		registerReceiver(mReceiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        super.onResume();
+    }
+    
+	void startSensors() {
+		if (mAccCheckBox.isChecked()) {
+			mSensorManager.registerListener(this, mAccelerometer,
+					mAccSamplingRate);
+		}
+
+		if (mGyroCheckBox.isChecked()) {
+			mSensorManager.registerListener(this, mGyro, mGyroSamplingRate);
+		}
+
+		if (mCompassCheckBox.isChecked()) {
+			mSensorManager.registerListener(this, mCompass,
+					mCompassSamplingRate);
+		}
+		mSensorSlider.setEnabled(false);
+		
+		if (mWiFiCheckBox.isChecked()){
+			if (mWifiManager == null)
+				mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+			
+			if (mReceiverWifi==null)
+				mReceiverWifi = new WifiReceiver();
+			
+		    registerReceiver(mReceiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+			if(!mWifiManager.startScan()) {
+				mWiFiTextView.setText("Scan starts...");
+			}
+		}
+	}
+	
+	class WifiReceiver extends BroadcastReceiver {
+        public void onReceive(Context c, Intent intent) {
+        	StringBuilder sb = new StringBuilder();
+            wifiList = mWifiManager.getScanResults();
+            for(int i = 0; i < wifiList.size(); i++){
+                sb.append(new Integer(i+1).toString() + ".");
+                sb.append((wifiList.get(i)).toString());
+                sb.append("\n");
+            }
+            mWiFiTextView.setText(sb);
+            SystemClock.sleep(500);
+            mWifiManager.startScan();           
+        }
+    }
+	
+	void stopSensors() {
+		mSensorManager.unregisterListener(this);
+		mSensorSlider.setEnabled(true);
+	}
+
+	void resetAll() {
+		if (isStarted) {
+			mStartButton.setText("Start");
+			stopSensors();
+			isStarted = false;
+		}
+		mSensorSlider.setProgress(DEFAULT_SAMPLING_RATE);
+		mWiFiCheckBox.setChecked(false);
+		mAccCheckBox.setChecked(false);
+		mGyroCheckBox.setChecked(false);
+		mCompassCheckBox.setChecked(false);
+
+		mAccXTextView.setText("X");
+		mAccYTextView.setText("Y");
+		mAccZTextView.setText("Z");
+		mGyroXTextView.setText("X");
+		mGyroYTextView.setText("Y");
+		mGyroZTextView.setText("Z");
+		mCompassTextView.setText("");
+		mWiFiTextView.setText("");
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+		SensorXYZ acc, gyro;
+		if (event.sensor == mAccelerometer) {
+			acc = new SensorXYZ();
+			acc.X = event.values[0];
+			acc.Y = event.values[1];
+			acc.Z = event.values[2];
+			acc.timestamp = event.timestamp;
+
+			mAccXTextView.setText("X = " + String.format("%.4f", acc.X));
+			mAccYTextView.setText("Y = " + String.format("%.4f", acc.Y));
+			mAccZTextView.setText("Z = " + String.format("%.4f", acc.Z));
+		}
+
+		if (event.sensor == mGyro) {
+			gyro = new SensorXYZ();
+			gyro.X = event.values[0];
+			gyro.Y = event.values[1];
+			gyro.Z = event.values[2];
+			gyro.timestamp = event.timestamp;
+
+			mGyroXTextView.setText("X = " + String.format("%.4f", gyro.X));
+			mGyroYTextView.setText("Y = " + String.format("%.4f", gyro.Y));
+			mGyroZTextView.setText("Z = " + String.format("%.4f", gyro.Z));
+		}
+
+		if (event.sensor == mCompass) {
+			mCompassTextView.setText("Azimuth = " + event.values[0]);
+		}
+
+	}
+
+	private class SensorXYZ {
+		long timestamp;
+		float X;
+		float Y;
+		float Z;
+	}
+}
