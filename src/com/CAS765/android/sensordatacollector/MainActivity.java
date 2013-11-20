@@ -151,6 +151,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		});
 		
 		mDelayTestButton = (Button) findViewById(R.id.delayTest);
+		
 		mDelayTestButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -162,22 +163,35 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 				// check if enabled and if not send user to the GSP settings
 				if (!enabled) {
-					new AlertDialog.Builder(null)
+					new AlertDialog.Builder(MainActivity.this)
 					.setTitle("GPS not enabled")
-					.setMessage("Without an accelerometer, this application will be unable to " +
-							"count your steps. Closing the application")
-							// TODO dismiss
-							.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int which) { 
-									  Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-									  startActivity(intent);
-									  
-								}
-							})
-							.show();
-				} 
+					.setMessage("To establish your starting location, you must enable GPS.")
+					.setNegativeButton("Dismiss",new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,int id) {
+							// if this button is clicked, just close
+							// the dialog box and do nothing
+							dialog.cancel();
+						}
+					})
+					.setPositiveButton("Open Settings", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) { 
+							// Open Settings application
+							Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+							startActivity(intent);
+						}
+					})
+					.show();
+				} else {
+
+					LatLng Start = getLocation();
+					mStepCount.setText(""+Start.lat + " "+Start.lng);
+
+					// TODO: convert Lat and Lng to map coordinates. 
+					
+				}
 				
-				getLocation();
+				
+				
 //				mProgress.setMax(MAXDATA);
 //				mProgress.setProgress(0);
 			}
@@ -209,7 +223,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 
 	}// End onCreate
-	public double getLocation()
+	
+	//	KB
+	//	This function gets the GPS coordinates of the device, and returns a LatLng object. 
+	public LatLng getLocation()
 	{ 
 		// Get the location manager
 		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -217,10 +234,31 @@ public class MainActivity extends Activity implements SensorEventListener {
 //		String bestProvider = locationManager.getBestProvider(criteria, false);
 //		Location location = locationManager.getLastKnownLocation(bestProvider);
 		Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		double longitude = location.getLongitude();
-		double latitude = location.getLatitude();
-		return longitude;
+		LatLng GPScoords = new LatLng(location.getLatitude(), location.getLongitude());
+		return GPScoords;
 	}
+	
+	// KB 
+	// This class contains the Latitude and Longitude of a location
+	final class LatLng {
+	    private final double lat;
+	    private final double lng;
+
+	    public LatLng(double first, double second) {
+	        this.lat = first;
+	        this.lng = second;
+	    }
+
+	    public double getLat() {
+	        return lat;
+	    }
+
+	    public double getLng() {
+	        return lng;
+	    }
+	}
+	
+	
 	protected void onPause() {
 		super.onPause();
 	}
@@ -403,7 +441,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				{
 					steps++;
 					samplesWalking = 0;
-					mStepCount.setText(""+steps);
+					//mStepCount.setText(""+steps);
 				}
 		}	
 		
