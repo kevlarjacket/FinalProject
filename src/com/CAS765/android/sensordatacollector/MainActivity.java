@@ -43,6 +43,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -52,6 +53,7 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.location.*;
 
 public class MainActivity extends Activity implements SensorEventListener {
 	// If the values are set to 0 then we will sample as fast as we can
@@ -152,8 +154,32 @@ public class MainActivity extends Activity implements SensorEventListener {
 		mDelayTestButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mProgress.setMax(MAXDATA);
-				mProgress.setProgress(0);
+				// KB I'm changing this button to get the nearest GPS coordinates. 
+				
+				LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
+				boolean enabled = service
+				  .isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+				// check if enabled and if not send user to the GSP settings
+				if (!enabled) {
+					new AlertDialog.Builder(null)
+					.setTitle("GPS not enabled")
+					.setMessage("Without an accelerometer, this application will be unable to " +
+							"count your steps. Closing the application")
+							// TODO dismiss
+							.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int which) { 
+									  Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+									  startActivity(intent);
+									  
+								}
+							})
+							.show();
+				} 
+				
+				getLocation();
+//				mProgress.setMax(MAXDATA);
+//				mProgress.setProgress(0);
 			}
 		});
 
@@ -183,7 +209,18 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 
 	}// End onCreate
-
+	public double getLocation()
+	{ 
+		// Get the location manager
+		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+//		Criteria criteria = new Criteria();
+//		String bestProvider = locationManager.getBestProvider(criteria, false);
+//		Location location = locationManager.getLastKnownLocation(bestProvider);
+		Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		double longitude = location.getLongitude();
+		double latitude = location.getLatitude();
+		return longitude;
+	}
 	protected void onPause() {
 		super.onPause();
 	}
@@ -406,24 +443,5 @@ public class MainActivity extends Activity implements SensorEventListener {
 		return Math.sqrt(sum/n);
 	}
 
-//	private class SensorReading {
-//		String type;
-//		long timestamp;
-//		public float values[];
-//
-//		public SensorReading(String t, long time, float v[]) {
-//			type = new String(t.toLowerCase());
-//			timestamp = time;
-//			values = v.clone();
-//		}
-//
-//		@Override
-//		public String toString() {
-//			if (type.equals("acc"))
-//				return new String(timestamp + String.format("%.4f", values[0])
-//						+ " " + String.format("%.4f", values[1]) + " "
-//						+ String.format("%.4f", values[2]));
-//			return new String("Invalid sensor type");
-//		}
-//	}
+
 }
