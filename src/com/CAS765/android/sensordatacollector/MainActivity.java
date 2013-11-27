@@ -182,11 +182,27 @@ public class MainActivity extends Activity implements SensorEventListener {
 					})
 					.show();
 				} else {
-
+					// A corrosponds to A on the map.  it is the reference location.
+					LatLng A = new LatLng(43.2584365, -79.9213903);
 					LatLng Start = getLocation();
-					mStepCount.setText(""+Start.lat + " "+Start.lng);
-
-					// TODO: convert Lat and Lng to map coordinates. 
+					// points from the map, can be used for testing. 
+					//	A(43.2584365, -79.9213903) 
+					//	B(43.2584002, -79.9204924) 
+					//	C(43.2591504, -79.9205123) 
+					//	D(43.2591378, -79.9214089)
+					// Start = new LatLng(43.2591504, -79.9205123);
+					
+					double RelLat = Start.lat - A.lat;
+					double RelLng = Start.lng - A.lng;
+					double SlopeLat = 0.000000977;
+					double SlopeLng = 0.000001349;
+					double X = RelLat / SlopeLat + 483;
+					double Y = RelLng / SlopeLng + 141;
+					
+					//mStepCount.setText(""+Start.lat + " "+Start.lng);
+					mStepCount.setText(""+X + " "+Y);
+					
+					// TODO: check to ensure coordinates are near ITB
 					
 				}
 				
@@ -235,7 +251,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 //		Location location = locationManager.getLastKnownLocation(bestProvider);
 		Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		LatLng GPScoords = new LatLng(location.getLatitude(), location.getLongitude());
+		
+		Log.d("GPScoords","Lat="+GPScoords.getLat()+" Lng="+GPScoords.getLng());
+		
 		return GPScoords;
+		
+		
 	}
 	
 	// KB 
