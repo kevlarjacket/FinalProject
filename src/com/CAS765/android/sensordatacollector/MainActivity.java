@@ -77,12 +77,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		mStepCount = (TextView) findViewById(R.id.stepDisplay);
 		
-		mTOpt = (TextView) findViewById(R.id.tOptText);
-		mStdDev = (TextView) findViewById(R.id.stdDevText);
-		mMaxAuto = (TextView) findViewById(R.id.maxAutoText);
-		mCurState = (TextView) findViewById(R.id.curStateText);
-		mAccelMag = (TextView) findViewById(R.id.accelMagText);
-		
+//		mTOpt = (TextView) findViewById(R.id.tOptText);
+//		mStdDev = (TextView) findViewById(R.id.stdDevText);
+//		mMaxAuto = (TextView) findViewById(R.id.maxAutoText);
+//		mCurState = (TextView) findViewById(R.id.curStateText);
+//		mAccelMag = (TextView) findViewById(R.id.accelMagText);
+//		
 		mSensorSampleRateTextView = (TextView) findViewById(R.id.sensorSamplingRateTextView);
 		
 		// Check the availability of the sensors. Disable the corresponding
