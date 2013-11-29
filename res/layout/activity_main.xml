@@ -58,8 +58,29 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HEADING"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/headingDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
     </LinearLayout>
 
+    <!--
     <TextView
         android:id="@+id/stdDevText"
         android:layout_width="wrap_content"
@@ -68,7 +89,7 @@
         android:layout_alignRight="@+id/sensorSamplingRateTextView"
         android:layout_below="@+id/sensorSamplingRateTextView"
         android:textAppearance="?android:attr/textAppearanceSmall" />
-<!--
+
     <TextView
         android:id="@+id/maxAutoText"
         android:layout_width="wrap_content"
@@ -104,7 +125,8 @@
         android:layout_alignRight="@+id/accelMagText"
         android:layout_below="@+id/accelMagText"
         android:textAppearance="?android:attr/textAppearanceSmall" />
--->
+    -->
+
     <Button
         android:id="@+id/reset_button"
         android:layout_width="wrap_content"

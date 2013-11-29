@@ -62,10 +62,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private final int DEFAULT_SAMPLING_RATE = 50;
 
 	private Button mStartButton, mResetButton, mDelayTestButton;
-	private TextView mStepCount, mSensorSampleRateTextView;
-	private TextView mStdDev, mMaxAuto,mCurState,mAccelMag,mTOpt;
+	private TextView mStepCount, mHeadingOffset;
+	//private TextView mStdDev, mMaxAuto,mCurState,mAccelMag,mTOpt;
 	private SensorManager mSensorManager;
-	private Sensor mAccelerometer;
+	private Sensor mAccelerometer, mGyro, mCompass;
 	private boolean isStarted = false;
 	private OutputStreamWriter mAccOutWriter;
 	private FileOutputStream mAccOut;
@@ -76,18 +76,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 		setContentView(R.layout.activity_main);
 
 		mStepCount = (TextView) findViewById(R.id.stepDisplay);
-		
-//		mTOpt = (TextView) findViewById(R.id.tOptText);
-//		mStdDev = (TextView) findViewById(R.id.stdDevText);
-//		mMaxAuto = (TextView) findViewById(R.id.maxAutoText);
-//		mCurState = (TextView) findViewById(R.id.curStateText);
-//		mAccelMag = (TextView) findViewById(R.id.accelMagText);
-//		
-		mSensorSampleRateTextView = (TextView) findViewById(R.id.sensorSamplingRateTextView);
-		
+		mHeadingOffset = (TextView) findViewById(R.id.headingDisplay);
+
 		// Check the availability of the sensors. Disable the corresponding
 		// views if the sensor is not available
 		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		
+		mCompass = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+		
 		// get the accelerometer sensor
 		if ((mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)) == null) {
 			new AlertDialog.Builder(this)
@@ -182,11 +178,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					// TODO: check to ensure coordinates are near ITB
 					
 				}
-				
-				
-				
-//				mProgress.setMax(MAXDATA);
-//				mProgress.setProgress(0);
+
 			}
 		});
 
@@ -223,9 +215,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	{ 
 		// Get the location manager
 		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-//		Criteria criteria = new Criteria();
-//		String bestProvider = locationManager.getBestProvider(criteria, false);
-//		Location location = locationManager.getLastKnownLocation(bestProvider);
 		Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		LatLng GPScoords = new LatLng(location.getLatitude(), location.getLongitude());
 		
@@ -257,12 +246,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 	}
 	
 	
+	@Override
 	protected void onPause() {
-		super.onPause();
+	    // Unregister the listener on the onPause() event to preserve battery life;
+	    super.onPause();
+	    mSensorManager.unregisterListener(this);
 	}
 
+	@Override
 	protected void onResume() {
-		super.onResume();
+	    super.onResume();
+	    mSensorManager.registerListener(this, mCompass, SensorManager.SENSOR_DELAY_NORMAL);
 	}
 
 	protected void onStop() {
@@ -305,17 +299,18 @@ public class MainActivity extends Activity implements SensorEventListener {
 			stopAll();
 			isStarted = false;
 		}
-		accelData  = new  LinkedList<Double>();
-		displayInterval=0;
-		steps = 0;						
-		state = INACTIVE;
-		T = 0;
-		Topt = 70;					// Optimal tau value, changed in program
-		Tmin = 40;					// Minimum tau value
-		Tmax = 100; 				// Maximum tau value
-		samplesWalking = 0;	
+//		accelData  = new  LinkedList<Double>();
+//		displayInterval=0;
+//		steps = 0;						
+//		state = INACTIVE;
+//		T = 0;
+//		Topt = 70;					// Optimal tau value, changed in program
+//		Tmin = 40;					// Minimum tau value
+//		Tmax = 100; 				// Maximum tau value
+//		samplesWalking = 0;	
 		
 		mStepCount.setText("0");
+		mHeadingOffset.setText("0");
 	}
 
 	@Override
@@ -331,41 +326,48 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	}
 
-	// --------------------------------------------------------------------
-	// These are the variables needed for our calculations
-	public static final int 
-			INACTIVE = 0, 
-			WALKING = 1,
-			MAXDATA = 200;						//the maximum amount of data points saved
-	
-	private int displayInterval=0;
-	private int steps = 0;						// Total steps taken is global variable
-	private int state = INACTIVE;    			// maybe either 0, for inactive, or 1, for walking
-	
-	//List<Double> v = new LinkedList<Double>();	// Array of maximum auto-correlation values across samples
-	//double v = 0;
-	// Current data input sample 'm'
-	List<Double> accelData  = new  LinkedList<Double>();	// Input acceleration data, assumed in g
-	 	
-	private int T = 0,
-			Topt = 70,					// Optimal tau value, changed in program
-			Tmin = 40,					// Minimum tau value
-			Tmax = 100, 				// Maximum tau value
-			samplesWalking = 0;			// m for simplicity is set for currentsamples;
-	// --------------------------------------------------------------------
+//	// --------------------------------------------------------------------
+//	// These are the variables needed for our calculations
+//	public static final int 
+//			INACTIVE = 0, 
+//			WALKING = 1,
+//			MAXDATA = 200;						//the maximum amount of data points saved
+//	
+//	private int displayInterval=0;
+//	private int steps = 0;						// Total steps taken is global variable
+//	private int state = INACTIVE;    			// maybe either 0, for inactive, or 1, for walking
+//	
+//	//List<Double> v = new LinkedList<Double>();	// Array of maximum auto-correlation values across samples
+//	//double v = 0;
+//	// Current data input sample 'm'
+//	List<Double> accelData  = new  LinkedList<Double>();	// Input acceleration data, assumed in g
+//	 	
+//	private int T = 0,
+//			Topt = 70,					// Optimal tau value, changed in program
+//			Tmin = 40,					// Minimum tau value
+//			Tmax = 100, 				// Maximum tau value
+//			samplesWalking = 0;			// m for simplicity is set for currentsamples;
+//	// --------------------------------------------------------------------
 
 	// Handling sensor reading changes
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		// all code goes here!
-		displayInterval++;
-		// calculate magnitude of acceleration.
-		double accelX = event.values[0];
-		double accelY = event.values[1];
-		double accelZ = event.values[2];
-
 		
+	    float azimuth = Math.round(event.values[0]);
+	    // The other values provided are: 
+	    //  float pitch = event.values[1];
+	    //  float roll = event.values[2];
+	    mHeadingOffset.setText("Azimuth: " + Float.toString(azimuth));
 		
+//		// all code goes here!
+//		displayInterval++;
+//		// calculate magnitude of acceleration.
+//		double accelX = event.values[0];
+//		double accelY = event.values[1];
+//		double accelZ = event.values[2];
+//
+//		
+//		
 //		double accelMag = Math.sqrt(Math.pow(accelX,2) + Math.pow(accelY,2) + Math.pow(accelZ,2));
 //		
 //		// save current acceleration value.
