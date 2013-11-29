@@ -57,18 +57,15 @@ import android.location.*;
 
 public class MainActivity extends Activity implements SensorEventListener {
 	// If the values are set to 0 then we will sample as fast as we can
+	// all in Hz
 	private final int MAX_SAMPLE = 100;
 	private final int DEFAULT_SAMPLING_RATE = 50;
 
 	private Button mStartButton, mResetButton, mDelayTestButton;
 	private TextView mStepCount, mSensorSampleRateTextView;
 	private TextView mStdDev, mMaxAuto,mCurState,mAccelMag,mTOpt;
-	private SeekBar mSensorSlider;
-	private ProgressBar mProgress;
 	private SensorManager mSensorManager;
 	private Sensor mAccelerometer;
-	// all in Hz
-	private int mSensorSamplingRate = DEFAULT_SAMPLING_RATE;
 	private boolean isStarted = false;
 	private OutputStreamWriter mAccOutWriter;
 	private FileOutputStream mAccOut;
@@ -87,27 +84,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		mAccelMag = (TextView) findViewById(R.id.accelMagText);
 		
 		mSensorSampleRateTextView = (TextView) findViewById(R.id.sensorSamplingRateTextView);
-		mProgress = (ProgressBar) findViewById(R.id.progressBar1);
 		
-		mSensorSlider = (SeekBar) findViewById(R.id.sensorSamplingRate);
-		mSensorSlider.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-			public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
-				mSensorSampleRateTextView.setText("Sampling rate = " + progress	+ "(Hz)");
-				// KB --------------------
-				mSensorSamplingRate = 1000000/(progress+1);
-				// -----------------------
-			}
-			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-			}
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-			}
-		});
-
-		mSensorSlider.setMax(MAX_SAMPLE);
-		mSensorSlider.setProgress(DEFAULT_SAMPLING_RATE);
-
 		// Check the availability of the sensors. Disable the corresponding
 		// views if the sensor is not available
 		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -304,15 +281,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 
 	void startSensors() {
-		mSensorManager.registerListener(this, mAccelerometer, mSensorSamplingRate);
-
-		// Disable the slider after starting the sensors
-		mSensorSlider.setEnabled(false);
+		mSensorManager.registerListener(this, mAccelerometer, DEFAULT_SAMPLING_RATE);
 	}
 
 	//Upon stopping the sensors, 
 	void stopAll() {
-		mSensorSlider.setEnabled(true);
 		mSensorManager.unregisterListener(this, mAccelerometer);
 
 		try {
@@ -342,8 +315,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 		Tmax = 100; 				// Maximum tau value
 		samplesWalking = 0;	
 		
-		mSensorSlider.setProgress(DEFAULT_SAMPLING_RATE);
-
 		mStepCount.setText("0");
 	}
 
@@ -398,7 +369,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		// save current acceleration value.
 		accelData.add(accelMag);
 		//mStepCount.setText(Double.toString(accelMag));
-		if (mProgress.getProgress()<MAXDATA) mProgress.setProgress(mProgress.getProgress()+1);
+	
 		if (accelData.size() > MAXDATA)
 			accelData.remove(0);
 		else
@@ -444,7 +415,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		if (Tmax>=100) {Tmax=100;}
 			
 		
-		if (stdDev(0,mSensorSlider.getProgress()+1,mean(0,mSensorSlider.getProgress()+1)) < 0.01*9.8)		// If standard deviation of current data is <0.01, set state back to IDLE
+		if (stdDev(0,DEFAULT_SAMPLING_RATE+1,mean(0,DEFAULT_SAMPLING_RATE+1)) < 0.01*9.8)		// If standard deviation of current data is <0.01, set state back to IDLE
 		{
 			state = INACTIVE;
 			samplesWalking = 0;			// Also reset samples spent walking
@@ -471,10 +442,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 			displayInterval=0;
 			mTOpt.setText("T Optimal: "+Topt);
 			mMaxAuto.setText("Max Autocorrelation: "+v);
-			mStdDev.setText("Std Dev: "+(stdDev(0,mSensorSlider.getProgress()+1,mean(0,mSensorSlider.getProgress()+1))/9.8)+"g");
+			mStdDev.setText("Std Dev: "+(stdDev(0,DEFAULT_SAMPLING_RATE+1,mean(0,DEFAULT_SAMPLING_RATE+1))/9.8)+"g");
 			if (state==INACTIVE) mCurState.setText("State=INACTIVE");
 			if (state==WALKING) mCurState.setText("State=WALKING");
-			mAccelMag.setText("Mean Accel"+mean(0,mSensorSlider.getProgress()+1));
+			mAccelMag.setText("Mean Accel"+mean(0,DEFAULT_SAMPLING_RATE+1));
 			
 			
 		}

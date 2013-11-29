@@ -25,17 +25,16 @@ public final class R {
     }
     public static final class id {
         public static final int accelMagText=0x7f08000b;
-        public static final int action_settings=0x7f080010;
+        public static final int action_settings=0x7f08000f;
         public static final int curStateText=0x7f08000a;
-        public static final int delayTest=0x7f08000f;
+        public static final int delayTest=0x7f08000e;
         public static final int linearLayout1=0x7f080001;
         public static final int maxAutoText=0x7f080009;
-        public static final int progressBar1=0x7f08000d;
-        public static final int reset_button=0x7f08000e;
+        public static final int reset_button=0x7f08000d;
         public static final int rlayout=0x7f080000;
-        public static final int sensorGroup=0x7f080004;
-        public static final int sensorSamplingRate=0x7f080002;
-        public static final int sensorSamplingRateTextView=0x7f080003;
+        public static final int sensorGroup=0x7f080003;
+        public static final int sensorSamplingRate=0x7f080004;
+        public static final int sensorSamplingRateTextView=0x7f080002;
         public static final int start_button=0x7f080008;
         public static final int stdDevText=0x7f080007;
         public static final int stepDisplay=0x7f080006;

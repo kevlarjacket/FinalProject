@@ -20,13 +20,6 @@
         android:orientation="horizontal" >
     </LinearLayout>
 
-    <SeekBar
-        android:id="@+id/sensorSamplingRate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/sensorSamplingRateTextView"
-        android:layout_centerVertical="true" />
-
     <TextView
         android:id="@+id/sensorSamplingRateTextView"
         android:layout_width="match_parent"
@@ -111,16 +104,6 @@
         android:layout_alignRight="@+id/accelMagText"
         android:layout_below="@+id/accelMagText"
         android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <ProgressBar
-        android:id="@+id/progressBar1"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/sensorGroup"
-        android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/sensorGroup"
-        android:layout_marginTop="20dp" />
 
     <Button
         android:id="@+id/reset_button"
